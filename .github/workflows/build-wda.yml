@@ -12,9 +12,17 @@ jobs:
     runs-on: macos-14 # Sonoma，目前在役且镜像仍带 Xcode 14.3.1（macos-13 已退役会一直 queued）
 
     steps:
-      - name: 选择 Xcode 14.3.1
+      - name: 选择 Xcode 14.x（自动探测，列出全部可用版本）
         run: |
-          sudo xcode-select -s /Applications/Xcode_14.3.1.app
+          echo "== 本 runner 可用 Xcode =="
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_14*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XC" ]; then
+            echo "::error::此 runner 没有 Xcode 14.x（上面列表为实际可用版本）"
+            exit 1
+          fi
+          echo "选用：$XC"
+          sudo xcode-select -s "$XC"
           xcodebuild -version
 
       - name: 拉取 WebDriverAgent 源码（锁老 tag，HEAD 已需 Xcode15 编不动）

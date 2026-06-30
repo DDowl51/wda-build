@@ -12,13 +12,18 @@ jobs:
     runs-on: macos-14 # Sonoma，目前在役且镜像仍带 Xcode 14.3.1（macos-13 已退役会一直 queued）
 
     steps:
-      - name: 选择 Xcode 14.x（自动探测，列出全部可用版本）
+      - name: 选择 Xcode（优先 14.x，否则用最高 15.x —— 都兼容 iOS16；避开 16+）
+        # iOS16 崩溃的 XCTCommandLineToolHelper 符号是 Xcode 16 才引入的，
+        # 所以 14.x / 15.x 编出来的 WDA 都能在 iOS16 上跑；macos-14 只带 15.x，够用。
         run: |
           echo "== 本 runner 可用 Xcode =="
           ls -d /Applications/Xcode*.app
           XC=$(ls -d /Applications/Xcode_14*.app 2>/dev/null | sort -V | tail -1)
           if [ -z "$XC" ]; then
-            echo "::error::此 runner 没有 Xcode 14.x（上面列表为实际可用版本）"
+            XC=$(ls -d /Applications/Xcode_15*.app 2>/dev/null | sort -V | tail -1)
+          fi
+          if [ -z "$XC" ]; then
+            echo "::error::此 runner 没有 Xcode 14.x/15.x（上面列表为实际可用版本）"
             exit 1
           fi
           echo "选用：$XC"

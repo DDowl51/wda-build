@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-wda:
-    runs-on: macos-13 # 这个镜像带 Xcode 14.3.1
+    runs-on: macos-14 # Sonoma，目前在役且镜像仍带 Xcode 14.3.1（macos-13 已退役会一直 queued）
 
     steps:
       - name: 选择 Xcode 14.3.1
